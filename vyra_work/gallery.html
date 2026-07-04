@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — ZEROX</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect width=%2240%22 height=%2240%22 fill=%22%23050505%22/><path d=%22M10 12h20l-14 16h14%22 fill=%22none%22 stroke=%22%23DC143C%22 stroke-width=%223%22/></svg>">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .gal-header{ padding:9rem clamp(1.5rem,5vw,4rem) 2rem; }
+  .gal-header h1{ font-size:clamp(2.2rem,6vw,4rem); text-transform:uppercase; }
+  .gal-header p{ color:var(--ink); max-width:56ch; margin-top:1rem; line-height:1.7; }
+
+  .gal-block{ padding:2rem clamp(1.5rem,5vw,4rem) 5rem; border-top:1px solid var(--line); }
+  .gal-block-head{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+  .gal-block-head h2{ font-size:clamp(1.8rem,4vw,2.8rem); text-transform:uppercase; }
+  .gal-count{ font-family:var(--mono); font-size:.7rem; color:var(--ink-dim); letter-spacing:.1em; }
+
+  .filters{ display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom:2.4rem; }
+  .filter-btn{
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+    border:1px solid var(--line); padding:.6em 1.2em; color:var(--ink); transition:all .3s var(--ease);
+  }
+  .filter-btn:hover{ color:var(--white); border-color:var(--ink); }
+  .filter-btn.active{ background:var(--red); border-color:var(--red); color:var(--white); }
+
+  /* masonry via columns keeps native aspect ratio, no stretching */
+  .masonry{ column-count:4; column-gap:1rem; }
+  @media(max-width:1100px){ .masonry{ column-count:3; } }
+  @media(max-width:760px){ .masonry{ column-count:2; } }
+  @media(max-width:460px){ .masonry{ column-count:1; } }
+
+  .m-item{
+    break-inside:avoid; margin-bottom:1rem; position:relative; overflow:hidden;
+    border:1px solid var(--line); background:var(--surface);
+    opacity:0; transform:translateY(16px) scale(.98);
+    transition:opacity .5s var(--ease), transform .5s var(--ease);
+  }
+  .m-item.show{ opacity:1; transform:translateY(0) scale(1); }
+  .m-item.fade-out{ display:none; }
+  .m-item img{ width:100%; height:auto; display:block; transition:transform .6s var(--ease); }
+  .m-item:hover img{ transform:scale(1.04); }
+  .m-caption{
+    position:absolute; left:0; right:0; bottom:0; padding:.9rem 1rem;
+    background:linear-gradient(180deg, transparent, rgba(8,7,10,.94));
+    opacity:0; transition:opacity .3s var(--ease);
+  }
+  .m-item:hover .m-caption{ opacity:1; }
+  .m-caption .tag{ font-family:var(--mono); font-size:.6rem; letter-spacing:.15em; color:var(--red-bright); text-transform:uppercase; }
+  .m-caption .name{ font-family:var(--display); font-size:.82rem; font-weight:700; margin-top:2px; }
+
+  /* web design project cards */
+  .web-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.4rem; }
+  .web-card{ border:1px solid var(--line); background:var(--surface); overflow:hidden; }
+  .web-card .thumb{ aspect-ratio:16/10; overflow:hidden; }
+  .web-card img{ width:100%; height:100%; object-fit:cover; transition:transform .6s var(--ease); }
+  .web-card:hover img{ transform:scale(1.06); }
+  .thumb-text{
+    width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(139,0,0,.16), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 26px),
+      var(--surface-2);
+    font-family:var(--display); font-weight:900; font-size:clamp(1.6rem,3vw,2.1rem); letter-spacing:.06em;
+    color:var(--tc, var(--red-bright)); text-transform:uppercase; text-shadow:0 0 30px rgba(220,20,60,.25);
+    transition:transform .6s var(--ease);
+  }
+  .thumb-text span{ display:block; font-family:var(--mono); font-weight:400; font-size:.6rem; letter-spacing:.4em; color:var(--ink-dim); }
+  .web-card:hover .thumb-text{ transform:scale(1.05); }
+  .web-card-body{ padding:1.2rem 1.3rem 1.4rem; }
+  .web-card-tag{ font-family:var(--mono); font-size:.62rem; letter-spacing:.15em; color:var(--red-bright); text-transform:uppercase; }
+  .web-card-title{ font-family:var(--display); font-size:1.1rem; margin:.4rem 0 .6rem; }
+  .web-card-desc{ font-size:.85rem; color:var(--ink); line-height:1.6; margin-bottom:1rem; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<nav class="nav scrolled">
+  <a href="index.html" class="nav-logo">
+    <svg class="z-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="zGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a3a3a"/><stop offset="45%" stop-color="#0d0d0d"/><stop offset="55%" stop-color="#8B0000"/><stop offset="100%" stop-color="#DC143C"/></linearGradient></defs>
+      <path class="z-blade" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+      <path class="z-edge" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+    </svg>
+    <span class="brand-word">ZEROX</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="index.html#about">About</a>
+    <a href="gallery.html" class="active">Gallery</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-burger"><span></span><span></span><span></span></div>
+</nav>
+
+<header class="gal-header">
+  <div class="eyebrow reveal">Full Archive</div>
+  <h1 class="reveal">Gallery</h1>
+  <p class="reveal">Every project, sorted. Web Design covers front-end builds; Character Design covers illustration work across styles.</p>
+</header>
+
+<!-- ================= WEB DESIGN ================= -->
+<section class="gal-block" id="web">
+  <div class="gal-block-head">
+    <h2>Front-End Projects</h2>
+    <span class="gal-count">04 Projects</span>
+  </div>
+
+  <div class="web-cards">
+    <a class="web-card reveal" href="projects/ecommerce/index.html" data-cursor-active>
+      <div class="thumb"><div class="thumb-text" style="--tc:#DC143C">ZEROX<span>PROJECTS</span></div></div>
+      <div class="web-card-body">
+        <span class="web-card-tag">E-commerce</span>
+        <div class="web-card-title">NOVA — Streetwear Store</div>
+        <div class="web-card-desc">Product grid, animated hover states, cart drawer — built with vanilla HTML/CSS/JS.</div>
+        <span class="btn" style="padding:.7em 1.4em">View Project</span>
+      </div>
+    </a>
+    <a class="web-card reveal" href="projects/cosmetics/index.html" data-cursor-active>
+      <div class="thumb"><div class="thumb-text" style="--tc:#B8933D">ZEROX<span>PROJECTS</span></div></div>
+      <div class="web-card-body">
+        <span class="web-card-tag">Cosmetics</span>
+        <div class="web-card-title">LUXE — Beauty Landing</div>
+        <div class="web-card-desc">Soft-luxury landing page with scroll reveals and a shade-matching interaction.</div>
+        <span class="btn" style="padding:.7em 1.4em">View Project</span>
+      </div>
+    </a>
+    <a class="web-card reveal" href="projects/dashboard/index.html" data-cursor-active>
+      <div class="thumb"><div class="thumb-text" style="--tc:#DC143C">ZEROX<span>PROJECTS</span></div></div>
+      <div class="web-card-body">
+        <span class="web-card-tag">SaaS Dashboard</span>
+        <div class="web-card-title">PULSE — Analytics UI</div>
+        <div class="web-card-desc">Data dashboard with animated charts, cards and a dark control-room feel.</div>
+        <span class="btn" style="padding:.7em 1.4em">View Project</span>
+      </div>
+    </a>
+    <a class="web-card reveal" href="index.html#about" data-cursor-active>
+      <div class="thumb"><div class="thumb-text" style="--tc:#8B0000">ZEROX<span>PROJECTS</span></div></div>
+      <div class="web-card-body">
+        <span class="web-card-tag">In Progress</span>
+        <div class="web-card-title">VOID — Portfolio Engine</div>
+        <div class="web-card-desc">A cinematic, motion-driven portfolio shell — the engine behind ZEROX itself.</div>
+        <span class="btn" style="padding:.7em 1.4em">Learn More</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ================= CHARACTER DESIGN ================= -->
+<section class="gal-block" id="character">
+  <div class="gal-block-head">
+    <h2>Character &amp; Illustration</h2>
+    <span class="gal-count" id="charCount">26 Pieces</span>
+  </div>
+
+  <div class="filters" id="charFilters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="anime">Anime</button>
+    <button class="filter-btn" data-filter="character">Character Design</button>
+    <button class="filter-btn" data-filter="chibi">Chibi</button>
+    <button class="filter-btn" data-filter="illustration">Illustration</button>
+  </div>
+
+  <div class="masonry" id="masonryGrid">
+    <!-- Anime -->
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-01.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-02.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-03.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-04.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-05.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-06.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-07.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+    <div class="m-item" data-cat="anime"><img src="assets/art/web/anime-08.webp" loading="lazy" alt="Anime digital illustration"><div class="m-caption"><span class="tag">Anime</span><div class="name">Digital Illustration</div></div></div>
+
+    <!-- Kai -->
+    <div class="m-item" data-cat="chibi"><img src="assets/art/web/chibi-01.webp" loading="lazy" alt="Kai chibi character"><div class="m-caption"><span class="tag">Furry / Chibi</span><div class="name">Kai</div></div></div>
+    <div class="m-item" data-cat="chibi"><img src="assets/art/web/chibi-02.webp" loading="lazy" alt="Kai chibi character"><div class="m-caption"><span class="tag">Furry / Chibi</span><div class="name">Kai</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-banner-01.webp" loading="lazy" alt="Kai character banner"><div class="m-caption"><span class="tag">Furry / Banner</span><div class="name">Kai</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-banner-02.webp" loading="lazy" alt="Kai character banner"><div class="m-caption"><span class="tag">Furry / Banner</span><div class="name">Kai</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-scene-01.webp" loading="lazy" alt="Kai scene illustration"><div class="m-caption"><span class="tag">Furry / Scene</span><div class="name">Kai</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-scene-02.webp" loading="lazy" alt="Kai scene illustration"><div class="m-caption"><span class="tag">Furry / Scene</span><div class="name">Kai</div></div></div>
+
+    <!-- Seno -->
+    <div class="m-item" data-cat="chibi"><img src="assets/art/web/chibi-03.webp" loading="lazy" alt="Seno chibi character"><div class="m-caption"><span class="tag">Furry / Chibi</span><div class="name">Seno</div></div></div>
+    <div class="m-item" data-cat="chibi"><img src="assets/art/web/chibi-04.webp" loading="lazy" alt="Seno chibi character"><div class="m-caption"><span class="tag">Furry / Chibi</span><div class="name">Seno</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-banner-03.webp" loading="lazy" alt="Seno character banner"><div class="m-caption"><span class="tag">Furry / Banner</span><div class="name">Seno</div></div></div>
+
+    <!-- Anthro Bust -->
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-bust-01.webp" loading="lazy" alt="Anthro character headshot"><div class="m-caption"><span class="tag">Furry / Headshot</span><div class="name">Anthro Bust</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-bust-02.webp" loading="lazy" alt="Anthro character headshot"><div class="m-caption"><span class="tag">Furry / Headshot</span><div class="name">Anthro Bust</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-bust-03.webp" loading="lazy" alt="Anthro character headshot"><div class="m-caption"><span class="tag">Furry / Headshot</span><div class="name">Anthro Bust</div></div></div>
+    <div class="m-item" data-cat="character"><img src="assets/art/web/furry-bust-04.webp" loading="lazy" alt="Anthro character headshot"><div class="m-caption"><span class="tag">Furry / Headshot</span><div class="name">Anthro Bust</div></div></div>
+
+    <!-- Design Sheet -->
+    <div class="m-item" data-cat="illustration"><img src="assets/art/web/furry-refsheet-01.webp" loading="lazy" alt="Character design reference sheet"><div class="m-caption"><span class="tag">Reference Sheet</span><div class="name">Design Study</div></div></div>
+
+    <!-- Fan Art -->
+    <div class="m-item" data-cat="illustration"><img src="assets/art/web/fanart-01.webp" loading="lazy" alt="Fan art illustration"><div class="m-caption"><span class="tag">Fan Art</span><div class="name">Flat Vector Style</div></div></div>
+    <div class="m-item" data-cat="illustration"><img src="assets/art/web/fanart-02.webp" loading="lazy" alt="Fan art illustration"><div class="m-caption"><span class="tag">Fan Art</span><div class="name">Flat Vector Style</div></div></div>
+    <div class="m-item" data-cat="illustration"><img src="assets/art/web/fanart-03.webp" loading="lazy" alt="Fan art illustration"><div class="m-caption"><span class="tag">Fan Art</span><div class="name">Cel-Shaded Style</div></div></div>
+    <div class="m-item" data-cat="illustration"><img src="assets/art/web/fanart-04.webp" loading="lazy" alt="Fan art illustration"><div class="m-caption"><span class="tag">Fan Art</span><div class="name">Cel-Shaded Style</div></div></div>
+  </div>
+</section>
+
+<div id="zerox-chat-mount"></div>
+
+<footer class="footer">
+  <span>© 2026 ZEROX — Muhammad Umer Farooq</span>
+  <span>Karachi, Pakistan</span>
+  <a href="mailto:umerfarooq63831@gmail.com">umerfarooq63831@gmail.com</a>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // reveal masonry items on load
+  const items = document.querySelectorAll('.m-item');
+  items.forEach((el,i) => setTimeout(()=>el.classList.add('show'), 40*i));
+
+  // filter logic
+  const filterBtns = document.querySelectorAll('#charFilters .filter-btn');
+  const countEl = document.getElementById('charCount');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      let visible = 0;
+      items.forEach(item => {
+        const match = f === 'all' || item.dataset.cat === f;
+        item.classList.toggle('fade-out', !match);
+        if(match) visible++;
+      });
+      countEl.textContent = visible + (visible === 1 ? ' Piece' : ' Pieces');
+    });
+  });
+
+  // deep-link support: #char-kai etc from homepage
+  const hash = window.location.hash.replace('#char-','').replace('#','');
+  if(hash){
+    const safeHash = hash.replace(/[^a-zA-Z0-9_-]/g, '');
+    const target = document.querySelector(`#charFilters [data-filter="${safeHash}"]`);
+    if(target) target.click();
+    const block = document.getElementById(hash === 'web' ? 'web' : 'character');
+    if(block) setTimeout(()=>block.scrollIntoView({behavior:'smooth'}), 300);
+  }
+</script>
+</body>
+</html>

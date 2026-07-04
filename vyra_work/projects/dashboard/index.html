@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PULSE — Analytics Dashboard (ZEROX Project)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#0b0e13; --panel:#12161d; --panel2:#181d26; --line:#232a35;
+    --ink:#e7ecf3; --dim:#7c8798; --teal:#35e8c4; --violet:#8a7bff; --amber:#ffb547;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  a{ text-decoration:none; color:inherit; }
+
+  .backlink{
+    position:fixed; top:1.2rem; left:1.2rem; z-index:200;
+    font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+    background:var(--teal); color:#05201a; padding:.7em 1.1em; border-radius:4px; font-weight:600;
+  }
+
+  .shell{ display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+  @media(max-width:800px){ .shell{ grid-template-columns:1fr; } }
+
+  .sidebar{ background:var(--panel); border-right:1px solid var(--line); padding:5.5rem 1.4rem 2rem; display:flex; flex-direction:column; gap:.3rem; }
+  @media(max-width:800px){ .sidebar{ display:none; } }
+  .sb-logo{ font-weight:700; font-size:1.2rem; margin-bottom:2rem; display:flex; align-items:center; gap:.5em; }
+  .sb-logo .dot{ width:10px; height:10px; border-radius:50%; background:var(--teal); box-shadow:0 0 12px var(--teal); }
+  .sb-link{ padding:.8em 1em; border-radius:6px; font-size:.85rem; color:var(--dim); display:flex; align-items:center; gap:.7em; }
+  .sb-link.active{ background:var(--panel2); color:var(--ink); }
+  .sb-link:hover{ color:var(--ink); }
+
+  .main{ padding:5.5rem clamp(1.2rem,4vw,2.6rem) 3rem; }
+  .top-row{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+  .top-row h1{ font-size:clamp(1.6rem,3vw,2.2rem); }
+  .top-row p{ color:var(--dim); font-size:.85rem; margin-top:.4rem; }
+  .range-pick{ display:flex; gap:.4rem; }
+  .range-pick button{
+    font-family:'JetBrains Mono',monospace; font-size:.7rem; padding:.5em 1em; border:1px solid var(--line);
+    background:var(--panel); color:var(--dim); border-radius:5px; cursor:pointer; transition:all .2s;
+  }
+  .range-pick button.active{ background:var(--teal); color:#05201a; border-color:var(--teal); }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:1.6rem; }
+  .stat-card{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1.3rem 1.4rem; }
+  .stat-card .lbl{ font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); }
+  .stat-card .val{ font-size:1.9rem; font-weight:700; margin:.5rem 0 .3rem; }
+  .stat-card .delta{ font-family:'JetBrains Mono',monospace; font-size:.72rem; }
+  .delta.up{ color:var(--teal); } .delta.down{ color:#ff6b6b; }
+
+  .panels{ display:grid; grid-template-columns:1.5fr 1fr; gap:1.2rem; }
+  @media(max-width:900px){ .panels{ grid-template-columns:1fr; } }
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1.4rem 1.5rem; }
+  .panel h3{ font-size:1rem; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center; }
+  .panel h3 span{ font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--dim); font-weight:400; }
+
+  .chart{ display:flex; align-items:flex-end; gap:.6rem; height:180px; }
+  .bar{ flex:1; background:linear-gradient(180deg, var(--teal), rgba(53,232,196,.15)); border-radius:4px 4px 0 0; position:relative; transition:transform .3s; height:0; }
+  .bar:hover{ transform:scaleY(1.03); filter:brightness(1.2); }
+  .chart-labels{ display:flex; gap:.6rem; margin-top:.6rem; }
+  .chart-labels span{ flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--dim); }
+
+  .donut-wrap{ display:flex; align-items:center; gap:1.4rem; flex-wrap:wrap; }
+  .donut{ width:140px; height:140px; border-radius:50%; background:conic-gradient(var(--teal) 0 42%, var(--violet) 42% 71%, var(--amber) 71% 100%); position:relative; flex-shrink:0; }
+  .donut::after{ content:''; position:absolute; inset:20px; border-radius:50%; background:var(--panel); }
+  .legend{ display:flex; flex-direction:column; gap:.6rem; font-size:.8rem; }
+  .legend div{ display:flex; align-items:center; gap:.6em; }
+  .legend i{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+
+  .row-list{ margin-top:1.2rem; display:flex; flex-direction:column; gap:.8rem; }
+  .row-item{ display:flex; justify-content:space-between; align-items:center; font-size:.82rem; padding-bottom:.8rem; border-bottom:1px solid var(--line); }
+  .row-item:last-child{ border:none; padding-bottom:0; }
+  .row-item .name{ display:flex; align-items:center; gap:.7em; }
+  .row-item .avatar{ width:26px; height:26px; border-radius:50%; background:var(--panel2); display:flex; align-items:center; justify-content:center; font-size:.7rem; }
+  .row-item .amt{ font-family:'JetBrains Mono',monospace; color:var(--teal); }
+</style>
+</head>
+<body>
+
+<a href="../../index.html" class="backlink">← Back to ZEROX</a>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sb-logo"><div class="dot"></div>PULSE</div>
+    <a class="sb-link active">📊 Overview</a>
+    <a class="sb-link">👥 Audience</a>
+    <a class="sb-link">💳 Revenue</a>
+    <a class="sb-link">⚙️ Settings</a>
+  </aside>
+
+  <main class="main">
+    <div class="top-row">
+      <div>
+        <h1>Overview</h1>
+        <p>Live performance across your workspace — updated just now.</p>
+      </div>
+      <div class="range-pick">
+        <button class="active">7D</button>
+        <button>30D</button>
+        <button>90D</button>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="lbl">Revenue</div><div class="val" id="v1">$0</div><div class="delta up">▲ 12.4% vs last week</div></div>
+      <div class="stat-card"><div class="lbl">Active Users</div><div class="val" id="v2">0</div><div class="delta up">▲ 8.1% vs last week</div></div>
+      <div class="stat-card"><div class="lbl">Conversion</div><div class="val" id="v3">0%</div><div class="delta down">▼ 1.2% vs last week</div></div>
+      <div class="stat-card"><div class="lbl">Churn</div><div class="val" id="v4">0%</div><div class="delta up">▲ 0.3% vs last week</div></div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h3>Weekly Revenue <span>USD</span></h3>
+        <div class="chart" id="chart"></div>
+        <div class="chart-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      </div>
+      <div class="panel">
+        <h3>Traffic Split</h3>
+        <div class="donut-wrap">
+          <div class="donut"></div>
+          <div class="legend">
+            <div><i style="background:var(--teal)"></i> Organic — 42%</div>
+            <div><i style="background:var(--violet)"></i> Referral — 29%</div>
+            <div><i style="background:var(--amber)"></i> Paid — 29%</div>
+          </div>
+        </div>
+        <div class="row-list">
+          <div class="row-item"><div class="name"><span class="avatar">👤</span> New Signups</div><span class="amt">+128</span></div>
+          <div class="row-item"><div class="name"><span class="avatar">💬</span> Support Tickets</div><span class="amt">14 open</span></div>
+          <div class="row-item"><div class="name"><span class="avatar">⭐</span> Avg. Rating</div><span class="amt">4.8 / 5</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function animateNumber(el, end, prefix='', suffix=''){
+    let cur = 0; const dur = 1200; const start = performance.now();
+    function tick(now){
+      const p = Math.min(1, (now - start)/dur);
+      const eased = 1 - Math.pow(1-p, 3);
+      cur = Math.round(end * eased);
+      el.textContent = prefix + cur.toLocaleString() + suffix;
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  animateNumber(document.getElementById('v1'), 48200, '$');
+  animateNumber(document.getElementById('v2'), 9840);
+  animateNumber(document.getElementById('v3'), 4, '', '.7%');
+  animateNumber(document.getElementById('v4'), 1, '', '.8%');
+
+  const data = [40, 65, 50, 80, 62, 90, 74];
+  const chart = document.getElementById('chart');
+  data.forEach((v,i) => {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    chart.appendChild(bar);
+    setTimeout(() => { bar.style.height = v + '%'; }, 100 + i*90);
+  });
+
+  document.querySelectorAll('.range-pick button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.range-pick button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

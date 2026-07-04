@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — ZEROX</title>
+<meta name="description" content="Get in touch with ZEROX — Muhammad Umer Farooq. WhatsApp, Instagram, Twitter, or send a message directly.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect width=%2240%22 height=%2240%22 fill=%22%23050505%22/><path d=%22M10 12h20l-14 16h14%22 fill=%22none%22 stroke=%22%23DC143C%22 stroke-width=%223%22/></svg>">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .contact-wrap{ min-height:100vh; display:grid; grid-template-columns:1fr 1fr; padding-top:6rem; }
+  @media(max-width:900px){ .contact-wrap{ grid-template-columns:1fr; } }
+  .contact-left{
+    padding:4rem clamp(1.5rem,5vw,4rem); display:flex; flex-direction:column; justify-content:center;
+    border-right:1px solid var(--line); position:relative; overflow:hidden;
+  }
+  .contact-left .hero-glow{ position:absolute; top:-10%; left:-10%; width:60vw; height:60vw; background:radial-gradient(circle, rgba(139,0,0,.2), transparent 65%); }
+  .contact-left h1{ font-size:clamp(2.2rem,5vw,3.6rem); text-transform:uppercase; position:relative; z-index:1; }
+  .contact-left p{ color:var(--ink); margin:1.4rem 0 2.2rem; max-width:44ch; line-height:1.7; position:relative; z-index:1; }
+  .contact-meta{ display:flex; flex-direction:column; gap:1.2rem; position:relative; z-index:1; margin-bottom:2.4rem; }
+  .contact-meta a, .contact-meta span{ font-family:var(--mono); font-size:.85rem; letter-spacing:.04em; color:var(--white); }
+  .contact-meta small{ display:block; font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.3rem; }
+
+  .contact-right{ padding:4rem clamp(1.5rem,5vw,4rem); display:flex; flex-direction:column; justify-content:center; gap:2.6rem; }
+  .form-group{ margin-bottom:1.4rem; }
+  .form-group label{ display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:var(--ink); margin-bottom:.6rem; }
+  .form-group input, .form-group textarea{
+    width:100%; background:transparent; border:1px solid var(--line); color:var(--white);
+    padding:.9em 1em; font-family:var(--body); font-size:.92rem; transition:border-color .3s var(--ease);
+  }
+  .form-group input:focus, .form-group textarea:focus{ outline:none; border-color:var(--red-bright); }
+  .form-group textarea{ resize:vertical; min-height:110px; }
+  .form-note{ font-family:var(--mono); font-size:.68rem; color:var(--ink-dim); margin-top:1rem; line-height:1.6; }
+  .form-status{ margin-top:1rem; font-size:.82rem; font-family:var(--mono); }
+  .form-status.ok{ color:#4ade80; }
+  .form-status.err{ color:var(--red-bright); }
+  .section-label{ font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; color:var(--red-bright); margin-bottom:1rem; }
+
+  /* consolidated WhatsApp card */
+  .wa-card{ grid-column:1 / -1; }
+  .wa-number-list{ display:flex; flex-direction:column; gap:.9rem; margin-top:.4rem; }
+  .wa-number-row{
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    border-top:1px solid var(--line); padding-top:.9rem;
+  }
+  .wa-number-row:first-child{ border-top:none; padding-top:0; }
+  .wa-number{ display:block; font-family:var(--display); font-weight:700; font-size:.98rem; }
+  .wa-status{ display:block; font-family:var(--mono); font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-top:.25rem; }
+  .wa-status-ok{ color:#4ade80; }
+  .wa-disabled .wa-number{ color:var(--ink-dim); }
+  .wa-disabled .wa-status{ color:var(--red-bright); }
+  .wa-open-btn{
+    flex-shrink:0; font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase;
+    border:1px solid var(--line); padding:.55em 1.1em; color:var(--white); transition:all .3s var(--ease);
+  }
+  .wa-open-btn:not(.wa-open-disabled):hover{ border-color:var(--red-bright); background:rgba(220,20,60,.14); }
+  .wa-open-disabled{ color:var(--ink-dim); border-color:var(--line); opacity:.5; cursor:not-allowed; pointer-events:none; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<nav class="nav scrolled">
+  <a href="index.html" class="nav-logo">
+    <svg class="z-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="zGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a3a3a"/><stop offset="45%" stop-color="#0d0d0d"/><stop offset="55%" stop-color="#8B0000"/><stop offset="100%" stop-color="#DC143C"/></linearGradient></defs>
+      <path class="z-blade" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+      <path class="z-edge" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+    </svg>
+    <span class="brand-word">ZEROX</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="index.html#about">About</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="contact.html" class="active">Contact</a>
+  </div>
+  <div class="nav-burger"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="contact-wrap">
+  <div class="contact-left">
+    <div class="hero-glow"></div>
+    <div class="eyebrow">Let's Talk</div>
+    <h1 class="reveal in">Start a<br>project.</h1>
+    <p class="reveal in">Whether it's a character commission or a front-end build — reach out directly or send a message and I'll get back to you.</p>
+    <div class="contact-meta reveal in">
+      <div><small>Email</small><a href="mailto:umerfarooq63831@gmail.com">umerfarooq63831@gmail.com</a></div>
+      <div><small>Location</small><span>Karachi, Pakistan</span></div>
+    </div>
+
+    <div class="section-label">Direct Channels</div>
+    <div class="contact-cards reveal in">
+      <div class="c-card wa-card glass-hover" data-cursor-active>
+        <div class="c-card-icon"><svg viewBox="0 0 24 24" fill="#DC143C"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.85.5 3.58 1.35 5.08L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.24h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.79 14.14c-.24.68-1.4 1.3-1.94 1.36-.5.06-1.06.09-1.7-.1-.4-.12-.9-.28-1.56-.55-2.75-1.19-4.55-3.96-4.68-4.14-.14-.19-1.12-1.48-1.12-2.83 0-1.34.7-2 .95-2.28.24-.27.53-.34.7-.34l.5.01c.16 0 .38-.06.6.46.24.58.8 2 .87 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.5-.15.15-.3.31-.13.6.16.29.72 1.19 1.55 1.93 1.06.94 1.96 1.24 2.25 1.38.28.14.45.12.62-.07.17-.19.71-.83.9-1.11.19-.29.38-.24.63-.14.26.1 1.63.77 1.91.91.29.14.48.21.55.33.07.12.07.68-.17 1.36z"/></svg></div>
+        <span class="c-card-label">WhatsApp</span>
+        <div class="wa-number-list">
+          <div class="wa-number-row wa-disabled">
+            <div><span class="wa-number">+92 323 4671664</span><span class="wa-status">Deactivated</span></div>
+            <span class="wa-open-btn wa-open-disabled">Unavailable</span>
+          </div>
+          <div class="wa-number-row">
+            <div><span class="wa-number">+92 308 3841500</span><span class="wa-status wa-status-ok">Active</span></div>
+            <a class="wa-open-btn" href="https://wa.me/923083841500" target="_blank" rel="noopener">Open</a>
+          </div>
+          <div class="wa-number-row">
+            <div><span class="wa-number">+92 326 9955040</span><span class="wa-status wa-status-ok">Active</span></div>
+            <a class="wa-open-btn" href="https://wa.me/923269955040" target="_blank" rel="noopener">Open</a>
+          </div>
+        </div>
+      </div>
+      <a class="c-card glass-hover" href="https://www.instagram.com/umer.xspamvoid" target="_blank" rel="noopener" data-cursor-active>
+        <div class="c-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#DC143C" stroke="none"/></svg></div>
+        <span class="c-card-label">Instagram</span>
+        <span class="c-card-value">@umer.xspamvoid</span>
+        <span class="c-card-sub">Design &amp; art posts</span>
+      </a>
+      <a class="c-card glass-hover" href="https://x.com/MiAmor0873458" target="_blank" rel="noopener" data-cursor-active>
+        <div class="c-card-icon"><svg viewBox="0 0 24 24" fill="#DC143C"><path d="M18.9 2H22l-7.6 8.7L23.3 22H16l-5.2-6.8L4.8 22H1.7l8.2-9.3L1 2h7.5l4.7 6.2L18.9 2Zm-1.3 18h1.7L7.3 4h-1.8l12.1 16Z"/></svg></div>
+        <span class="c-card-label">Twitter / X</span>
+        <span class="c-card-value">@MiAmor0873458</span>
+        <span class="c-card-sub">Updates &amp; threads</span>
+      </a>
+      <div class="c-card disabled" title="Discord is currently unavailable" data-cursor-active>
+        <div class="c-card-icon"><svg viewBox="0 0 24 24" fill="#6b6b6b"><path d="M20.3 4.4A19.7 19.7 0 0 0 15.6 3c-.2.4-.5 1-.7 1.4a18 18 0 0 0-5.8 0A14 14 0 0 0 8.4 3a19.6 19.6 0 0 0-4.7 1.4C1 9 .3 13.5.6 18a19.9 19.9 0 0 0 5.9 3s.7-1 1.3-2a12.8 12.8 0 0 1-2-1c.2-.1.3-.3.5-.4a14 14 0 0 0 11.4 0l.5.4a12.8 12.8 0 0 1-2 1c.6 1 1.2 2 1.3 2a19.8 19.8 0 0 0 6-3c.4-5.3-1-9.7-3.2-13.6ZM8.7 15c-1 0-1.8-1-1.8-2.1s.8-2.1 1.8-2.1 1.9 1 1.8 2.1c0 1.1-.8 2.1-1.8 2.1Zm6.6 0c-1 0-1.8-1-1.8-2.1s.8-2.1 1.8-2.1 1.9 1 1.8 2.1c0 1.1-.8 2.1-1.8 2.1Z"/></svg></div>
+        <span class="c-card-label">Discord</span>
+        <span class="c-card-value">Unavailable</span>
+        <span class="c-card-sub">Disabled for now</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-right">
+    <div>
+      <div class="section-label">Or Send a Message</div>
+      <form id="contactForm" class="reveal in">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-solid"><span class="shine"></span>Send Message</button>
+        <div class="form-status" id="formStatus"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="zerox-chat-mount"></div>
+
+<footer class="footer-lux">
+  <div class="footer-top">
+    <div>
+      <a href="index.html" class="footer-brand">
+        <svg class="z-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <path class="z-blade" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+          <path class="z-edge" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+        </svg>
+        ZEROX
+      </a>
+      <p class="footer-tag">Front-End Developer, Graphic Designer and Character Designer — Muhammad Umer Farooq.</p>
+    </div>
+    <div class="footer-nav">
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <a href="index.html">Home</a>
+        <a href="index.html#about">About</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a href="https://www.instagram.com/umer.xspamvoid" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://x.com/MiAmor0873458" target="_blank" rel="noopener">Twitter / X</a>
+        <a href="https://wa.me/923083841500" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 ZEROX — Muhammad Umer Farooq</span>
+    <span>Karachi, Pakistan</span>
+    <a href="#top" class="back-to-top" aria-label="Back to top" data-cursor-active>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </a>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  const form = document.getElementById('contactForm');
+  const status = document.getElementById('formStatus');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = 'Sending…';
+    status.className = 'form-status';
+    try{
+      const res = await fetch('backend/send.php', {
+        method:'POST',
+        body:new FormData(form)
+      });
+      const data = await res.json();
+      if(data.ok){
+        status.textContent = data.message || 'Message sent — thank you!';
+        status.className = 'form-status ok';
+        form.reset();
+      } else {
+        status.textContent = data.error || 'Could not send message.';
+        status.className = 'form-status err';
+      }
+    }catch(err){
+      status.textContent = 'Could not send right now — email umerfarooq63831@gmail.com directly, or use WhatsApp above.';
+      status.className = 'form-status err';
+    }
+  });
+</script>
+</body>
+</html>

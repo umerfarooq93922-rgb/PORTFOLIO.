@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZEROX — Muhammad Umer Farooq | Front-End Developer &amp; Character Designer</title>
+<meta name="description" content="ZEROX — the portfolio of Muhammad Umer Farooq. Front-end development, graphic design, and character design.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect width=%2240%22 height=%2240%22 fill=%22%23050505%22/><path d=%22M10 12h20l-14 16h14%22 fill=%22none%22 stroke=%22%23DC143C%22 stroke-width=%223%22/></svg>">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  .hero{ min-height:100vh; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; padding:8rem clamp(1.5rem,5vw,4rem) 4rem; }
+  #hero-canvas{ position:absolute; inset:0; z-index:0; opacity:.9; }
+  .hero-fog{ position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse at 50% 40%, transparent 30%, #050505 85%); }
+  .hero-eyebrow{ font-family:var(--mono); font-size:.75rem; letter-spacing:.35em; text-transform:uppercase; color:var(--red-bright); margin-bottom:1.6rem; display:flex; align-items:center; gap:1em; z-index:2; position:relative; }
+  .hero-eyebrow::before{ content:''; width:40px; height:1px; background:var(--red-bright); }
+  .hero h1{ font-size:clamp(3.2rem,11vw,8.5rem); z-index:2; position:relative; text-transform:uppercase; text-shadow:0 0 60px rgba(220,20,60,.35); }
+  .hero-sub{ max-width:52ch; color:var(--ink); font-size:clamp(1rem,1.6vw,1.15rem); line-height:1.7; margin:1.4rem 0 2.6rem; z-index:2; position:relative; }
+  .hero-cta{ display:flex; gap:1rem; flex-wrap:wrap; z-index:2; position:relative; }
+  .hero-scroll{ position:absolute; bottom:2.4rem; left:clamp(1.5rem,5vw,4rem); font-family:var(--mono); font-size:.68rem; letter-spacing:.2em; color:var(--ink-dim); display:flex; align-items:center; gap:.8em; text-transform:uppercase; z-index:2; }
+  .hero-scroll .line{ width:1px; height:34px; background:linear-gradient(var(--red-bright), transparent); animation:scrollLine 1.8s ease-in-out infinite; }
+  @keyframes scrollLine{ 0%{ transform:scaleY(0); transform-origin:top; } 50%{ transform:scaleY(1); transform-origin:top; } 51%{ transform-origin:bottom; } 100%{ transform:scaleY(0); transform-origin:bottom; } }
+  .stat-row{ display:flex; gap:clamp(2rem,6vw,5rem); flex-wrap:wrap; margin-top:3.6rem; z-index:2; position:relative; }
+  .stat b{ display:block; font-family:var(--display); font-size:clamp(1.6rem,3vw,2.4rem); color:var(--white); }
+  .stat span{ font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; color:var(--ink-dim); text-transform:uppercase; }
+  .marquee-viewport{ overflow:hidden; position:relative; width:100%; perspective:1400px; }
+  .marquee-viewport::before, .marquee-viewport::after{
+    content:''; position:absolute; top:0; bottom:0; width:min(10vw,90px); z-index:4; pointer-events:none;
+  }
+  .marquee-viewport::before{ left:0; background:linear-gradient(90deg, var(--black), transparent); }
+  .marquee-viewport::after{ right:0; background:linear-gradient(270deg, var(--black), transparent); }
+  .marquee-track{
+    display:flex; gap:1.4rem; width:max-content;
+    animation:marqueeScroll linear infinite; will-change:transform;
+  }
+  .marquee-track.web-track{ animation-duration:38s; }
+  .marquee-track.char-track{ animation-duration:52s; }
+  .marquee-viewport:hover .marquee-track{ animation-play-state:paused; }
+  @keyframes marqueeScroll{ from{ transform:translate3d(0,0,0); } to{ transform:translate3d(-50%,0,0); } }
+
+  .proj-card{
+    position:relative; border:1px solid var(--line); overflow:hidden; background:var(--surface);
+    transform-style:preserve-3d; flex-shrink:0;
+    transition:transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s cubic-bezier(.22,1,.36,1), border-color .5s cubic-bezier(.22,1,.36,1);
+  }
+  .web-track .proj-card{ width:min(78vw, 340px); aspect-ratio:4/3; }
+  .char-track .proj-card{ width:min(52vw, 210px); aspect-ratio:3/4; }
+  .proj-card img{ width:100%; height:100%; object-fit:cover; transition:transform .8s cubic-bezier(.22,1,.36,1), filter .8s cubic-bezier(.22,1,.36,1); }
+  .proj-thumb-text{
+    width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(139,0,0,.16), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 26px),
+      var(--surface-2);
+    font-family:var(--display); font-weight:900; font-size:clamp(1.6rem,3.4vw,2.3rem); letter-spacing:.06em;
+    color:var(--tc, var(--red-bright)); text-transform:uppercase; text-shadow:0 0 30px rgba(220,20,60,.25);
+    transition:transform .8s cubic-bezier(.22,1,.36,1);
+  }
+  .proj-thumb-text span{ display:block; font-family:var(--mono); font-weight:400; font-size:.6rem; letter-spacing:.4em; color:var(--ink-dim); }
+  .proj-card:hover .proj-thumb-text{ transform:scale(1.06); }
+  .proj-card::after{
+    content:''; position:absolute; inset:0; z-index:1;
+    background:linear-gradient(180deg, transparent 30%, rgba(5,5,5,.94) 100%); opacity:.85;
+    transition:opacity .4s var(--ease);
+  }
+  .proj-card::before{
+    content:''; position:absolute; inset:0; z-index:2; pointer-events:none; opacity:0;
+    background:linear-gradient(135deg, rgba(255,255,255,.14), transparent 45%);
+    transition:opacity .4s var(--ease);
+  }
+  .proj-card:hover{
+    transform:translate3d(0,-10px,0) scale(1.045) rotateX(3deg) rotateY(-3deg);
+    border-color:var(--red-bright);
+    box-shadow:0 34px 70px rgba(0,0,0,.6), 0 0 46px rgba(220,20,60,.32), inset 0 0 0 1px rgba(220,20,60,.25);
+  }
+  .proj-card:hover::before{ opacity:1; }
+  .proj-card:hover img{ transform:scale(1.1); filter:saturate(1.18); }
+  .proj-info{ position:absolute; left:0; right:0; bottom:0; padding:1.4rem; z-index:3; }
+  .proj-tag{ font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; color:var(--red-bright); text-transform:uppercase; margin-bottom:.4rem; display:block; }
+  .proj-name{ font-family:var(--display); font-weight:700; font-size:1.15rem; }
+  .proj-stack{ font-family:var(--mono); font-size:.6rem; color:var(--ink); letter-spacing:.05em; margin-top:.4rem; }
+  .proj-arrow{ position:absolute; top:1.2rem; right:1.2rem; width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.3); display:flex; align-items:center; justify-content:center; z-index:3; transform:translateY(-8px); opacity:0; transition:all .4s var(--ease); }
+  .proj-card:hover .proj-arrow{ transform:translateY(0); opacity:1; border-color:var(--red-bright); background:rgba(139,0,0,.25); }
+  .proj-arrow svg{ width:14px; height:14px; }
+  .proj-logo{ position:absolute; top:1.2rem; left:1.2rem; width:38px; height:38px; z-index:3; filter:drop-shadow(0 3px 10px rgba(0,0,0,.6)); }
+  .char-card .proj-name{ font-size:.92rem; }
+  .see-more-row{ display:flex; justify-content:center; margin-top:2.6rem; }
+  @media (prefers-reduced-motion: reduce){ .marquee-track{ animation:none; } }
+  .about-line{ color:var(--ink); line-height:1.8; margin:1.4rem 0 2rem; max-width:48ch; }
+  .skill-tags{ display:flex; flex-wrap:wrap; gap:.6rem; }
+  .skill-tags span{ font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--line); padding:.6em 1em; color:var(--ink); }
+
+  /* ---------- CV modal ---------- */
+  .cv-overlay{
+    position:fixed; inset:0; z-index:500; background:rgba(5,5,5,.82); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center; padding:1.5rem;
+    opacity:0; visibility:hidden; transition:opacity .4s var(--ease), visibility .4s var(--ease);
+  }
+  .cv-overlay.open{ opacity:1; visibility:visible; }
+  .cv-modal{
+    position:relative; width:min(94vw,640px); max-height:86vh; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--line); box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 60px rgba(139,0,0,.15);
+    transform:translateY(24px) scale(.97); transition:transform .4s var(--ease);
+  }
+  .cv-overlay.open .cv-modal{ transform:translateY(0) scale(1); }
+  .cv-close{
+    position:absolute; top:1rem; right:1rem; z-index:2; background:none; border:none; color:var(--ink); font-size:1.6rem;
+    line-height:1; width:32px; height:32px; border-radius:50%; transition:all .3s var(--ease);
+  }
+  .cv-close:hover{ color:var(--red-bright); background:rgba(220,20,60,.1); }
+  .cv-panel{ display:none; padding:3rem 2.4rem; }
+  .cv-panel.active{ display:block; }
+  #cvChoice.active{ text-align:center; }
+  #cvChoice h3{ font-family:var(--display); font-size:1.6rem; margin:.6rem 0 .6rem; }
+  #cvChoice p{ color:var(--ink); margin-bottom:2rem; }
+  .cv-choice-row{ display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+  .cv-choice-btn{
+    flex:1; min-width:200px; display:flex; flex-direction:column; align-items:center; gap:.8rem;
+    border:1px solid var(--line); padding:1.6rem 1.2rem; color:var(--white); font-family:var(--mono);
+    font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; transition:all .35s var(--ease); background:none;
+  }
+  .cv-choice-btn svg{ width:28px; height:28px; }
+  .cv-choice-btn:hover{ border-color:var(--red-bright); background:rgba(220,20,60,.08); transform:translateY(-4px); }
+  .cv-back{ background:none; border:none; color:var(--red-bright); font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:1.4rem; }
+  .cv-doc-inner h2{ font-family:var(--display); font-size:1.8rem; }
+  .cv-doc-inner .cv-role{ color:var(--red-bright); font-family:var(--mono); font-size:.78rem; margin-top:.5rem; }
+  .cv-doc-inner .cv-meta{ color:var(--ink-dim); font-size:.76rem; font-family:var(--mono); margin:.4rem 0 1.6rem; }
+  .cv-doc-inner h4{ font-family:var(--mono); font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--red-bright); margin:1.6rem 0 .6rem; border-bottom:1px solid var(--line); padding-bottom:.5rem; }
+  .cv-doc-inner p{ color:var(--ink); font-size:.88rem; line-height:1.7; margin-bottom:.6rem; }
+  .cv-doc-inner ul{ padding-left:1.2rem; color:var(--ink); font-size:.88rem; line-height:1.8; }
+  .cv-doc-inner b{ color:var(--white); }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- LOADING SCREEN -->
+<div class="loader">
+  <div class="loader-pulse" style="top:30%;left:20%"></div>
+  <div class="loader-embers"></div>
+  <div class="loader-mark">
+    <svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="loadZ" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a3a3a"/><stop offset="45%" stop-color="#0d0d0d"/><stop offset="55%" stop-color="#8B0000"/><stop offset="100%" stop-color="#DC143C"/></linearGradient></defs>
+      <text x="150" y="82" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="52" fill="url(#loadZ)" letter-spacing="4">ZEROX</text>
+      <text x="150" y="108" text-anchor="middle" font-family="Space Mono, monospace" font-size="11" fill="#DC143C" letter-spacing="6"><tspan class="loader-glitch" data-text="DESIGN PORTFOLIO">DESIGN PORTFOLIO</tspan></text>
+    </svg>
+  </div>
+  <button class="loader-tap">Click / Tap to Enter</button>
+  <div class="loader-ring">
+    <svg viewBox="0 0 44 44">
+      <circle cx="22" cy="22" r="20" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+      <circle class="loader-ring-fill" cx="22" cy="22" r="20" fill="none" stroke="var(--red-bright)" stroke-width="1.5"/>
+    </svg>
+  </div>
+</div>
+<div class="loader-flash"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <svg class="z-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="zGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a3a3a"/><stop offset="45%" stop-color="#0d0d0d"/><stop offset="55%" stop-color="#8B0000"/><stop offset="100%" stop-color="#DC143C"/></linearGradient></defs>
+      <path class="z-blade" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+      <path class="z-edge" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+    </svg>
+    <span class="brand-word">ZEROX</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="index.html#about">About</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="nav-burger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-fog"></div>
+  <div class="hero-eyebrow">Muhammad Umer Farooq</div>
+  <h1 class="reveal in">ZEROX</h1>
+  <p class="hero-sub reveal in">Front-End Developer, Graphic Designer and Character Designer. I build cinematic, animated interfaces and design original characters across anime and anthro styles — precision on both sides of the screen.</p>
+  <div class="hero-cta reveal in">
+    <a href="gallery.html" class="btn btn-solid"><span class="shine"></span>Explore Work</a>
+    <a href="contact.html" class="btn"><span class="shine"></span>Contact Me</a>
+  </div>
+  <div class="stat-row reveal in">
+    <div class="stat"><b>4</b><span>Front-End Builds</span></div>
+    <div class="stat"><b>25+</b><span>Design Pieces</span></div>
+    <div class="stat"><b>3</b><span>Core Disciplines</span></div>
+  </div>
+  <div class="hero-scroll"><div class="line"></div>Scroll</div>
+</header>
+
+<!-- AVAILABILITY BANNER -->
+<div class="avail-banner reveal">
+  <div class="avail-dot"></div>
+  <span class="avail-label">Commissions &amp; Projects:</span>
+  <span class="avail-status">● Open for Q3 2026</span>
+  <a href="contact.html" class="avail-cta">Send a Brief →</a>
+</div>
+
+<!-- FEATURED FRONT-END -->
+<section class="section">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">Selected Work</div><h2>Front-End Projects</h2></div>
+    <p>Interfaces built on structure, motion and restraint — from commerce to control rooms.</p>
+  </div>
+  <div class="marquee-viewport">
+    <div class="marquee-track web-track">
+      <a class="proj-card reveal hover-glow" href="projects/ecommerce/index.html" data-cursor-active>
+        <div class="proj-thumb-text" style="--tc:#DC143C">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#DC143C" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#DC143C">N</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">E-commerce</span><span class="proj-name">NOVA — Streetwear Store</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <a class="proj-card reveal hover-glow" href="projects/cosmetics/index.html" data-cursor-active>
+        <div class="proj-thumb-text" style="--tc:#B8933D">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#B8933D" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#B8933D">L</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">Cosmetics</span><span class="proj-name">LUXE — Beauty Landing</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <a class="proj-card reveal hover-glow" href="projects/dashboard/index.html" data-cursor-active>
+        <div class="proj-thumb-text" style="--tc:#DC143C">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#DC143C" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#DC143C">P</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">SaaS Dashboard</span><span class="proj-name">PULSE — Analytics UI</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <a class="proj-card reveal hover-glow" href="gallery.html#web" data-cursor-active>
+        <div class="proj-thumb-text" style="--tc:#8B0000">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#8B0000" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#8B0000">V</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">In Progress</span><span class="proj-name">VOID — Portfolio Engine</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <!-- duplicate set for seamless infinite loop -->
+      <a class="proj-card reveal hover-glow" href="projects/ecommerce/index.html" data-cursor-active aria-hidden="true" tabindex="-1">
+        <div class="proj-thumb-text" style="--tc:#DC143C">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#DC143C" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#DC143C">N</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">E-commerce</span><span class="proj-name">NOVA — Streetwear Store</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <a class="proj-card reveal hover-glow" href="projects/cosmetics/index.html" data-cursor-active aria-hidden="true" tabindex="-1">
+        <div class="proj-thumb-text" style="--tc:#B8933D">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#B8933D" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#B8933D">L</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">Cosmetics</span><span class="proj-name">LUXE — Beauty Landing</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <a class="proj-card reveal hover-glow" href="projects/dashboard/index.html" data-cursor-active aria-hidden="true" tabindex="-1">
+        <div class="proj-thumb-text" style="--tc:#DC143C">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#DC143C" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#DC143C">P</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">SaaS Dashboard</span><span class="proj-name">PULSE — Analytics UI</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+      <a class="proj-card reveal hover-glow" href="gallery.html#web" data-cursor-active aria-hidden="true" tabindex="-1">
+        <div class="proj-thumb-text" style="--tc:#8B0000">ZEROX<span>PROJECTS</span></div>
+        <svg class="proj-logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="#0d0d0d" stroke="#8B0000" stroke-width="1"/><text x="20" y="26" text-anchor="middle" font-family="Cinzel, serif" font-weight="700" font-size="17" fill="#8B0000">V</text></svg>
+        <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></div>
+        <div class="proj-info"><span class="proj-tag">In Progress</span><span class="proj-name">VOID — Portfolio Engine</span><div class="proj-stack">HTML · CSS · JS</div></div>
+      </a>
+    </div>
+  </div>
+  <div class="see-more-row reveal"><a href="gallery.html#web" class="btn"><span class="shine"></span>See More Front-End</a></div>
+</section>
+
+<!-- FEATURED DESIGNS -->
+<section class="section" style="padding-top:0">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">Selected Work</div><h2>Featured Designs</h2></div>
+    <p>Anime, chibi, character design and illustration — original work across styles.</p>
+  </div>
+  <div class="marquee-viewport">
+    <div class="marquee-track char-track">
+      <a class="proj-card char-card reveal" href="gallery.html#chibi" data-cursor-active><img src="assets/art/web/chibi-01.webp" alt="Kai character design" loading="lazy"><div class="proj-info"><span class="proj-tag">Chibi</span><span class="proj-name">Kai</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#chibi" data-cursor-active><img src="assets/art/web/chibi-03.webp" alt="Seno character design" loading="lazy"><div class="proj-info"><span class="proj-tag">Chibi</span><span class="proj-name">Seno</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#anime" data-cursor-active><img src="assets/art/web/anime-01.webp" alt="Anime illustration" loading="lazy"><div class="proj-info"><span class="proj-tag">Anime</span><span class="proj-name">Illustration</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#anime" data-cursor-active><img src="assets/art/web/anime-04.webp" alt="Anime illustration" loading="lazy"><div class="proj-info"><span class="proj-tag">Anime</span><span class="proj-name">Illustration</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#character" data-cursor-active><img src="assets/art/web/furry-bust-01.webp" alt="Character bust design" loading="lazy"><div class="proj-info"><span class="proj-tag">Character Design</span><span class="proj-name">Anthro Bust</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#character" data-cursor-active><img src="assets/art/web/furry-scene-01.webp" alt="Character scene illustration" loading="lazy"><div class="proj-info"><span class="proj-tag">Illustration</span><span class="proj-name">Scene</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#illustration" data-cursor-active><img src="assets/art/web/fanart-02.webp" alt="Fan art illustration" loading="lazy"><div class="proj-info"><span class="proj-tag">Fan Art</span><span class="proj-name">Flat Vector</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#illustration" data-cursor-active><img src="assets/art/web/furry-refsheet-01.webp" alt="Design reference sheet" loading="lazy"><div class="proj-info"><span class="proj-tag">Logo Design</span><span class="proj-name">ZEROX Mark</span></div></a>
+      <!-- duplicate set for seamless infinite loop -->
+      <a class="proj-card char-card reveal" href="gallery.html#chibi" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/chibi-01.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Chibi</span><span class="proj-name">Kai</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#chibi" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/chibi-03.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Chibi</span><span class="proj-name">Seno</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#anime" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/anime-01.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Anime</span><span class="proj-name">Illustration</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#anime" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/anime-04.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Anime</span><span class="proj-name">Illustration</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#character" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/furry-bust-01.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Character Design</span><span class="proj-name">Anthro Bust</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#character" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/furry-scene-01.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Illustration</span><span class="proj-name">Scene</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#illustration" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/fanart-02.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Fan Art</span><span class="proj-name">Flat Vector</span></div></a>
+      <a class="proj-card char-card reveal" href="gallery.html#illustration" data-cursor-active aria-hidden="true" tabindex="-1"><img src="assets/art/web/furry-refsheet-01.webp" alt="" loading="lazy"><div class="proj-info"><span class="proj-tag">Logo Design</span><span class="proj-name">ZEROX Mark</span></div></a>
+    </div>
+  </div>
+  <div class="see-more-row reveal"><a href="gallery.html#character" class="btn"><span class="shine"></span>See More Designs</a></div>
+</section>
+
+<!-- SERVICES / DISCIPLINES -->
+<section class="section" style="padding-top:0">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">What I Do</div><h2>Disciplines</h2></div>
+    <p>Three lanes under one identity — precision on both sides of the screen.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      </div>
+      <h3>Front-End Development</h3>
+      <p>Landing pages, dashboards, e-commerce UI — clean structure, deliberate motion, and interfaces that feel intentional.</p>
+      <a href="gallery.html#web" class="btn" data-cursor-active><span class="shine"></span>View Projects</a>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <h3>Graphic Design</h3>
+      <p>Branding, logo design, and visual identity — dark, cinematic aesthetics with sharp attention to detail.</p>
+      <a href="gallery.html#illustration" class="btn" data-cursor-active><span class="shine"></span>View Work</a>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </div>
+      <h3>Character Design</h3>
+      <p>Anime, chibi, and anthro character design — original work built on expression, contrast, and colour theory.</p>
+      <a href="gallery.html#character" class="btn" data-cursor-active><span class="shine"></span>View Gallery</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="about-grid">
+    <div class="luxury-fade">
+      <div class="about-avatar">
+        <img src="assets/img/zerox-avatar.png" alt="ZEROX — Muhammad Umer Farooq wolf emblem">
+      </div>
+      <div class="about-stats">
+        <div class="stat"><b>3</b><span>Disciplines</span></div>
+        <div class="stat"><b>25+</b><span>Pieces</span></div>
+        <div class="stat"><b>4</b><span>Builds</span></div>
+      </div>
+      <button id="openCvModal" class="btn btn-solid" style="margin-top:1.4rem; width:100%; justify-content:center;" data-cursor-active><span class="shine"></span>View / Download CV</button>
+    </div>
+
+    <div class="reveal">
+      <div class="eyebrow">About</div>
+      <h2>Design is the detail<br>nobody asked for.</h2>
+      <p class="about-line">I'm Umer — building ZEROX at the intersection of front-end engineering, graphic design and character illustration. My web work is about clean structure, motion and interfaces that feel intentional; my design work leans into anime and anthro styles with an eye for expression, contrast and color.</p>
+
+      <div class="about-tabs">
+        <button class="about-tab active" data-tab="tab-journey">Creative Journey</button>
+        <button class="about-tab" data-tab="tab-skills">Skills</button>
+        <button class="about-tab" data-tab="tab-software">Software</button>
+      </div>
+
+      <div id="tab-journey" class="about-panel active">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-year">Origin</div>
+            <div class="tl-title">First Sketches</div>
+            <div class="tl-desc">Started drawing original characters, exploring anime and anthro design fundamentals — proportion, expression, silhouette.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">Growth</div>
+            <div class="tl-title">Front-End Foundations</div>
+            <div class="tl-desc">Picked up HTML, CSS and JavaScript, building layouts and learning to translate design instinct into working interfaces.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">Now</div>
+            <div class="tl-title">ZEROX</div>
+            <div class="tl-desc">Merging both disciplines into one identity — cinematic, dark, deliberate. Building a portfolio worth studying.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-skills" class="about-panel">
+        <div class="skill-bars">
+          <div class="skill-bar-row"><span class="skill-bar-label">HTML / CSS / JS</span><div class="skill-bar-track" style="--pct:92%"><div class="skill-bar-fill"></div></div></div>
+          <div class="skill-bar-row"><span class="skill-bar-label">Character Design</span><div class="skill-bar-track" style="--pct:88%"><div class="skill-bar-fill"></div></div></div>
+          <div class="skill-bar-row"><span class="skill-bar-label">UI Motion</span><div class="skill-bar-track" style="--pct:80%"><div class="skill-bar-fill"></div></div></div>
+          <div class="skill-bar-row"><span class="skill-bar-label">Illustration</span><div class="skill-bar-track" style="--pct:85%"><div class="skill-bar-fill"></div></div></div>
+        </div>
+      </div>
+
+      <div id="tab-software" class="about-panel">
+        <div class="skill-tags">
+          <span>Photoshop</span><span>Canva</span><span>HTML/CSS/JS</span><span>Three.js</span><span>Figma-style Layout</span>
+        </div>
+      </div>
+
+      <div class="about-cta-row">
+        <a href="contact.html" class="btn btn-solid" data-cursor-active><span class="shine"></span>Start a Project</a>
+        <a href="gallery.html" class="btn" data-cursor-active><span class="shine"></span>View Gallery</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS / WORKFLOW -->
+<section class="section" style="border-top:1px solid var(--line)">
+  <div class="section-head reveal" style="justify-content:center; text-align:center; flex-direction:column; align-items:center;">
+    <div class="eyebrow" style="justify-content:center;">How I Work</div>
+    <h2>From Concept to Launch</h2>
+    <p style="max-width:50ch;">Every project follows a proven process — no surprises, just deliberate execution.</p>
+  </div>
+  <div class="process-grid reveal">
+    <div class="process-step">
+      <div class="process-num">01</div>
+      <h3>Brief &amp; Research</h3>
+      <p>Understanding your vision, audience, and goals before a single line of code or sketch is drawn.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-num">02</div>
+      <h3>Design &amp; Iterate</h3>
+      <p>Wireframes, mockups, and style frames — refined until every pixel earns its place.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-num">03</div>
+      <h3>Build &amp; Motion</h3>
+      <p>Development with cinematic motion, responsive structure, and performance in mind.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-num">04</div>
+      <h3>Ship &amp; Support</h3>
+      <p>Polished delivery with post-launch support — your project doesn't end at deployment.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK / TOOLS -->
+<section class="section" style="border-top:1px solid var(--line)">
+  <div class="section-head reveal" style="justify-content:center; text-align:center; flex-direction:column; align-items:center;">
+    <div class="eyebrow" style="justify-content:center;">Toolbox</div>
+    <h2>Tools &amp; Technologies</h2>
+  </div>
+  <div class="tools-grid reveal">
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span>HTML / CSS / JS</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Character Design</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="12" r="2"/></svg><span>Photoshop</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg><span>Canva</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>Three.js</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span>Graphic Design</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>UI Motion</span></div>
+    <div class="tool-item"><svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span>Illustration</span></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" style="border-top:1px solid var(--line)">
+  <div class="section-head reveal" style="justify-content:center; text-align:center; flex-direction:column; align-items:center;">
+    <div class="eyebrow" style="justify-content:center;">Questions</div>
+    <h2>Frequently Asked</h2>
+  </div>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <button class="faq-q">What do you work on? <span class="plus"></span></button>
+      <div class="faq-a"><p>Two lanes under one identity: front-end development (landing pages, dashboards, e-commerce UI) and design (character illustration, graphic design, branding).</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Do you take commissions? <span class="plus"></span></button>
+      <div class="faq-a"><p>Yes — both character design commissions and front-end build requests. Reach out via the contact page with scope and timeline.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">What tools do you use? <span class="plus"></span></button>
+      <div class="faq-a"><p>Photoshop and Canva for design work; vanilla HTML, CSS and JavaScript for front-end builds, occasionally paired with Three.js for cinematic touches.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">How fast do you reply? <span class="plus"></span></button>
+      <div class="faq-a"><p>Usually within a day. WhatsApp is the fastest channel — see the contact page for direct links.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDY SPOTLIGHT -->
+<section class="section" style="border-top:1px solid var(--line)">
+  <div class="section-head reveal">
+    <div><div class="eyebrow">Case Study</div><h2>NOVA — Streetwear Store</h2></div>
+    <p>A deep dive into one of my front-end builds.</p>
+  </div>
+  <div class="case-grid">
+    <div class="case-visual reveal">
+      <div class="proj-thumb-text" style="--tc:#DC143C">NOVA<span>E-COMMERCE</span></div>
+    </div>
+    <div class="case-content reveal">
+      <span class="case-tag">E-commerce</span>
+      <h2>Streetwear,<br>reimagined</h2>
+      <p class="case-desc">A fully responsive e-commerce interface for a streetwear brand — complete with working cart drawer, product grid, and a dark, retail-ready atmosphere. Built from scratch with vanilla HTML, CSS, and JavaScript.</p>
+      <div class="case-metrics">
+        <div class="case-metric"><b>3</b><span>Pages</span></div>
+        <div class="case-metric"><b>0</b><span>Dependencies</span></div>
+        <div class="case-metric"><b>Full</b><span>Responsive</span></div>
+      </div>
+      <a href="projects/ecommerce/index.html" class="btn btn-solid" data-cursor-active><span class="shine"></span>View Live Project</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" style="border-top:1px solid var(--line)">
+  <div class="section-head reveal" style="justify-content:center; text-align:center; flex-direction:column; align-items:center;">
+    <div class="eyebrow" style="justify-content:center;">Kind Words</div>
+    <h2>What People Say</h2>
+    <p style="max-width:48ch;">Feedback from collaborators, clients, and the community.</p>
+  </div>
+  <div class="test-grid reveal">
+    <div class="test-card">
+      <p class="test-text">"Umer has a rare eye for detail — every interface he builds feels considered, from the micro-interactions to the overall atmosphere."</p>
+      <div class="test-author">
+        <div class="test-avatar">A</div>
+        <div><div class="test-name">Alex R.</div><div class="test-role">Design Lead, Freelance</div></div>
+      </div>
+    </div>
+    <div class="test-card">
+      <p class="test-text">"The character designs are incredible. Captures personality and expression in a way that's hard to find. Absolute professionalism."</p>
+      <div class="test-author">
+        <div class="test-avatar">M</div>
+        <div><div class="test-name">Maya K.</div><div class="test-role">Commission Client</div></div>
+      </div>
+    </div>
+    <div class="test-card">
+      <p class="test-text">"ZEROX has a distinct cinematic style that carries across both web and illustration — that kind of consistency is rare."</p>
+      <div class="test-author">
+        <div class="test-avatar">J</div>
+        <div><div class="test-name">Jamie T.</div><div class="test-role">Creative Director</div></div>
+      </div>
+    </div>
+    <div class="test-card">
+      <p class="test-text">"Picked up the brief fast and delivered ahead of schedule. The motion design on the dashboard exceeded what I had in mind."</p>
+      <div class="test-author">
+        <div class="test-avatar">S</div>
+        <div><div class="test-name">Samir H.</div><div class="test-role">Startup Founder</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="eyebrow cta-eyebrow" style="justify-content:center;">Let's Build Something</div>
+  <h2>Ready to start<br>your project?</h2>
+  <p>Whether it's a character commission or a front-end build — ZEROX turns detail into an identity.</p>
+  <div class="cta-row">
+    <a href="contact.html" class="btn btn-solid" data-cursor-active><span class="shine"></span>Contact Me</a>
+    <a href="gallery.html" class="btn" data-cursor-active><span class="shine"></span>Explore Work</a>
+  </div>
+</section>
+
+<div id="zerox-chat-mount"></div>
+
+<!-- FOOTER -->
+<footer class="footer-lux">
+  <div class="footer-top">
+    <div>
+      <a href="index.html" class="footer-brand">
+        <svg class="z-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <path class="z-blade" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+          <path class="z-edge" d="M8 10h24l-3 5H14l16 15-3 5H4l3-5h15L6 15z"/>
+        </svg>
+        ZEROX
+      </a>
+      <p class="footer-tag">Front-End Developer, Graphic Designer and Character Designer — Muhammad Umer Farooq.</p>
+    </div>
+    <div class="footer-nav">
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <a href="index.html">Home</a>
+        <a href="index.html#about">About</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a href="https://www.instagram.com/umer.xspamvoid" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://x.com/MiAmor0873458" target="_blank" rel="noopener">Twitter / X</a>
+        <a href="https://wa.me/923083841500" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 ZEROX — Muhammad Umer Farooq</span>
+    <span>Karachi, Pakistan</span>
+    <a href="#top" class="back-to-top" aria-label="Back to top" data-cursor-active>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </a>
+  </div>
+</footer>
+
+<!-- CV MODAL -->
+<div class="cv-overlay" id="cvOverlay">
+  <div class="cv-modal" id="cvModal">
+    <button class="cv-close" id="cvClose" aria-label="Close">×</button>
+
+    <div class="cv-panel" id="cvChoice">
+      <div class="eyebrow" style="justify-content:center;">Resume</div>
+      <h3>How would you like your CV?</h3>
+      <p>Read it right here, or take a Word copy with you.</p>
+      <div class="cv-choice-row">
+        <button class="cv-choice-btn" id="cvViewBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          View on Website
+        </button>
+        <a class="cv-choice-btn" id="cvDownloadBtn" href="assets/cv/ZEROX_CV_Muhammad_Umer_Farooq.docx" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#DC143C" stroke-width="1.6"><path d="M12 3v13m0 0-4-4m4 4 4-4M4 19h16"/></svg>
+          Download Word File
+        </a>
+      </div>
+    </div>
+
+    <div class="cv-panel cv-doc" id="cvDoc">
+      <button class="cv-back" id="cvBack">← Back</button>
+      <div class="cv-doc-inner">
+        <h2>Muhammad Umer Farooq</h2>
+        <p class="cv-role">ZEROX — Front-End Developer / Graphic Designer / Character Designer</p>
+        <p class="cv-meta">Karachi, Pakistan · umerfarooq63831@gmail.com · +92 323 4671664</p>
+
+        <h4>Profile</h4>
+        <p>I'm Umer — building ZEROX at the intersection of front-end engineering, graphic design and character illustration. My web work is about clean structure, motion and interfaces that feel intentional; my design work leans into anime and anthro styles with an eye for expression, contrast and color.</p>
+
+        <h4>Core Skills</h4>
+        <ul>
+          <li>HTML / CSS / JavaScript — 92%</li>
+          <li>Character Design (anime, chibi, anthro/furry) — 88%</li>
+          <li>UI Motion &amp; Interaction Design — 80%</li>
+          <li>Illustration — 85%</li>
+        </ul>
+
+        <h4>Software</h4>
+        <ul>
+          <li>Adobe Photoshop</li>
+          <li>Canva</li>
+          <li>HTML / CSS / JavaScript</li>
+          <li>Three.js (cinematic front-end effects)</li>
+        </ul>
+
+        <h4>Creative Journey</h4>
+        <p><b>Origin — First Sketches.</b> Started drawing original characters, exploring anime and anthro design fundamentals — proportion, expression, silhouette.</p>
+        <p><b>Growth — Front-End Foundations.</b> Picked up HTML, CSS and JavaScript, building layouts and learning to translate design instinct into working interfaces.</p>
+        <p><b>Now — ZEROX.</b> Merging both disciplines into one identity — cinematic, dark, deliberate.</p>
+
+        <h4>Selected Front-End Projects</h4>
+        <ul>
+          <li>NOVA — Streetwear e-commerce store (HTML / CSS / JS, working cart drawer)</li>
+          <li>LUXE — Beauty landing page (scroll reveals, shade-matching interaction)</li>
+          <li>PULSE — Analytics dashboard UI (animated charts, dark control-room feel)</li>
+          <li>VOID — Portfolio engine (the cinematic shell behind ZEROX itself)</li>
+        </ul>
+
+        <h4>Design Work</h4>
+        <p>25+ original pieces across anime illustration, chibi character design, anthro/furry character design, and flat-vector fan art.</p>
+
+        <a class="btn btn-solid" href="assets/cv/ZEROX_CV_Muhammad_Umer_Farooq.docx" download style="margin-top:1rem"><span class="shine"></span>Download Word Copy</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+  // ---- Cinematic 3D hero: floating gothic Z emblem, embers, volumetric smoke ----
+  (function(){
+    const canvas = document.getElementById('hero-canvas');
+    if(!canvas || typeof THREE === 'undefined') return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+    camera.position.set(0, 0, 9);
+
+    function resize(){
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // lighting
+    scene.add(new THREE.AmbientLight(0x220000, 1.4));
+    const key = new THREE.PointLight(0xdc143c, 6, 30); key.position.set(3, 2, 5); scene.add(key);
+    const rim = new THREE.PointLight(0x8b0000, 4, 30); rim.position.set(-4, -2, -3); scene.add(rim);
+
+    // gothic Z emblem — extruded shape
+    const shape = new THREE.Shape();
+    shape.moveTo(-1.6, 1.0); shape.lineTo(1.6, 1.0); shape.lineTo(1.6, 0.55); shape.lineTo(-0.5, 0.55);
+    shape.lineTo(1.6, -0.55); shape.lineTo(1.6, -1.0); shape.lineTo(-1.6, -1.0); shape.lineTo(-1.6, -0.55);
+    shape.lineTo(0.5, -0.55); shape.lineTo(-1.6, 0.55); shape.closePath();
+
+    const geo = new THREE.ExtrudeGeometry(shape, { depth:0.4, bevelEnabled:true, bevelThickness:0.06, bevelSize:0.06, bevelSegments:3 });
+    const mat = new THREE.MeshStandardMaterial({ color:0x121212, metalness:0.85, roughness:0.28, emissive:0x8b0000, emissiveIntensity:0.35 });
+    const zMesh = new THREE.Mesh(geo, mat);
+    zMesh.geometry.center();
+    zMesh.scale.setScalar(1.15);
+    scene.add(zMesh);
+
+    // embers
+    const emberCount = 140;
+    const positions = new Float32Array(emberCount * 3);
+    for(let i=0;i<emberCount;i++){
+      positions[i*3] = (Math.random()-0.5)*14;
+      positions[i*3+1] = (Math.random()-0.5)*10;
+      positions[i*3+2] = (Math.random()-0.5)*10 - 2;
+    }
+    const emberGeo = new THREE.BufferGeometry();
+    emberGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const emberMat = new THREE.PointsMaterial({ color:0xdc143c, size:0.045, transparent:true, opacity:0.75, sizeAttenuation:true });
+    const embers = new THREE.Points(emberGeo, emberMat);
+    scene.add(embers);
+
+    // soft smoke plane
+    const smokeGeo = new THREE.PlaneGeometry(20, 12);
+    const smokeMat = new THREE.MeshBasicMaterial({ color:0x3d0000, transparent:true, opacity:0.06 });
+    const smoke = new THREE.Mesh(smokeGeo, smokeMat);
+    smoke.position.z = -5;
+    scene.add(smoke);
+
+    let mx = 0, my = 0;
+    window.addEventListener('mousemove', e => {
+      mx = (e.clientX / window.innerWidth - 0.5) * 2;
+      my = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    let clock = new THREE.Clock();
+    function animate(){
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      if(!reduceMotion){
+        zMesh.rotation.y = t * 0.25 + mx * 0.3;
+        zMesh.rotation.x = Math.sin(t*0.4) * 0.08 + my * 0.15;
+        zMesh.position.y = Math.sin(t*0.6) * 0.15;
+        embers.rotation.y = t * 0.02;
+        const pos = emberGeo.attributes.position;
+        for(let i=0;i<emberCount;i++){
+          pos.array[i*3+1] += 0.004;
+          if(pos.array[i*3+1] > 6) pos.array[i*3+1] = -6;
+        }
+        pos.needsUpdate = true;
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+</script>
+<script>
+  // ---- CV modal ----
+  (function(){
+    const overlay = document.getElementById('cvOverlay');
+    const openBtn = document.getElementById('openCvModal');
+    const closeBtn = document.getElementById('cvClose');
+    const viewBtn = document.getElementById('cvViewBtn');
+    const backBtn = document.getElementById('cvBack');
+    const choicePanel = document.getElementById('cvChoice');
+    const docPanel = document.getElementById('cvDoc');
+
+    function showChoice(){ choicePanel.classList.add('active'); docPanel.classList.remove('active'); }
+    function openModal(){ overlay.classList.add('open'); showChoice(); }
+    function closeModal(){ overlay.classList.remove('open'); }
+
+    openBtn?.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+    viewBtn?.addEventListener('click', () => { choicePanel.classList.remove('active'); docPanel.classList.add('active'); });
+    backBtn?.addEventListener('click', showChoice);
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
+  })();
+</script>
+</body>
+</html>

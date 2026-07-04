@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXE — Beauty (ZEROX Project)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@300;400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#fbf3ef; --card:#ffffff; --ink:#3a2c2c; --rose:#c98b7a; --rose-deep:#9c5c4c; --line:#e7d5cd;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Jost',sans-serif; font-weight:300; }
+  .serif{ font-family:'Cormorant Garamond', serif; }
+  a{ text-decoration:none; color:inherit; }
+  img{ display:block; max-width:100%; }
+
+  .backlink{
+    position:fixed; top:1.2rem; left:1.2rem; z-index:200;
+    font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+    background:var(--ink); color:var(--bg); padding:.7em 1.1em; border-radius:2px;
+  }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.6rem clamp(1.2rem,5vw,3.5rem);
+  }
+  .logo{ font-family:'Cormorant Garamond',serif; font-size:1.8rem; letter-spacing:.08em; }
+  .nav-mini{ display:flex; gap:2.4rem; font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; }
+  .nav-mini a{ position:relative; }
+  .nav-mini a::after{ content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px; background:var(--rose-deep); transition:width .3s; }
+  .nav-mini a:hover::after{ width:100%; }
+
+  .hero{ display:grid; grid-template-columns:1fr 1fr; align-items:center; padding:2rem clamp(1.2rem,5vw,3.5rem) 4rem; gap:2rem; }
+  @media(max-width:820px){ .hero{ grid-template-columns:1fr; } }
+  .hero-copy .eyebrow{ font-size:.72rem; letter-spacing:.3em; text-transform:uppercase; color:var(--rose-deep); margin-bottom:1.2rem; }
+  .hero h1{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:clamp(2.6rem,6vw,4.6rem); line-height:1.05; }
+  .hero h1 i{ color:var(--rose-deep); }
+  .hero p{ margin:1.4rem 0 2rem; max-width:40ch; color:#6b5750; line-height:1.8; font-size:.95rem; }
+  .btn-rose{ display:inline-block; background:var(--rose-deep); color:#fff; padding:1em 2.2em; font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; border-radius:2px; transition:background .3s; }
+  .btn-rose:hover{ background:var(--ink); }
+
+  .hero-visual{
+    aspect-ratio:1; border-radius:50%; background:linear-gradient(160deg, #f6dfd5, #e6b7a6);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .hero-visual span{ font-size:5rem; }
+  .hero-visual .ring{ position:absolute; inset:-14px; border:1px solid var(--rose); border-radius:50%; opacity:.5; }
+
+  .marquee-strip{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:1rem 0; overflow:hidden; white-space:nowrap; }
+  .marquee-strip .t{ display:inline-block; animation:mv 20s linear infinite; font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:var(--rose-deep); }
+  .marquee-strip .t span{ margin:0 2rem; }
+  @keyframes mv{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  .shades{ padding:clamp(3rem,7vw,5rem) clamp(1.2rem,5vw,3.5rem); text-align:center; }
+  .shades h2{ font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3rem); margin-bottom:.6rem; }
+  .shades p{ color:#8a7770; max-width:46ch; margin:0 auto 2.6rem; font-size:.9rem; }
+  .shade-row{ display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-bottom:2.4rem; }
+  .shade-dot{ width:44px; height:44px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:all .25s; }
+  .shade-dot.active{ border-color:var(--ink); transform:scale(1.15); }
+  .shade-preview{
+    max-width:360px; margin:0 auto; background:var(--card); border-radius:8px; padding:2rem;
+    box-shadow:0 20px 50px rgba(60,30,20,.08); transition:background .4s;
+  }
+  .shade-preview .swatch{ width:100%; height:120px; border-radius:6px; margin-bottom:1.2rem; transition:background .4s; }
+  .shade-preview h3{ font-family:'Cormorant Garamond',serif; font-size:1.5rem; }
+  .shade-preview p{ font-size:.8rem; color:#8a7770; margin-top:.4rem; }
+
+  .products{ padding:0 clamp(1.2rem,5vw,3.5rem) clamp(3rem,7vw,5rem); }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.6rem; }
+  .card{ background:var(--card); border-radius:8px; overflow:hidden; box-shadow:0 10px 30px rgba(60,30,20,.06); transition:transform .3s; }
+  .card:hover{ transform:translateY(-6px); }
+  .card-img{ aspect-ratio:1; background:linear-gradient(160deg,#f6e3da,#e8c3b3); display:flex; align-items:center; justify-content:center; font-size:2.6rem; }
+  .card-body{ padding:1.2rem 1.3rem 1.4rem; }
+  .card-name{ font-family:'Cormorant Garamond',serif; font-size:1.15rem; }
+  .card-price{ color:var(--rose-deep); font-size:.85rem; margin:.4rem 0 .9rem; }
+  .card-body button{ width:100%; background:transparent; border:1px solid var(--rose-deep); color:var(--rose-deep); padding:.7em; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all .25s; }
+  .card-body button:hover{ background:var(--rose-deep); color:#fff; }
+
+  .footer-mini{ border-top:1px solid var(--line); padding:2rem clamp(1.2rem,5vw,3.5rem); display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#8a7770; }
+</style>
+</head>
+<body>
+
+<a href="../../index.html" class="backlink">← Back to ZEROX</a>
+
+<div class="topbar">
+  <div class="logo">LUXE</div>
+  <div class="nav-mini">
+    <a href="#shades">Shades</a>
+    <a href="#products">Shop</a>
+    <a href="#">About</a>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">New Collection</div>
+    <h1>Skin-first<br><i>beauty</i>, always.</h1>
+    <p>Clean formulas, buildable coverage, shades made for real skin. LUXE is beauty that doesn't ask you to hide.</p>
+    <a href="#shades" class="btn-rose">Find Your Shade</a>
+  </div>
+  <div class="hero-visual"><div class="ring"></div><span>💄</span></div>
+</section>
+
+<div class="marquee-strip">
+  <div class="t">
+    <span>CRUELTY FREE</span><span>DERMATOLOGIST TESTED</span><span>VEGAN FORMULA</span><span>30-DAY RETURNS</span>
+    <span>CRUELTY FREE</span><span>DERMATOLOGIST TESTED</span><span>VEGAN FORMULA</span><span>30-DAY RETURNS</span>
+  </div>
+</div>
+
+<section class="shades" id="shades">
+  <h2>Match Your Shade</h2>
+  <p>Tap a shade to preview it — our foundation range spans 24 undertone-matched tones.</p>
+  <div class="shade-row" id="shadeRow"></div>
+  <div class="shade-preview">
+    <div class="swatch" id="swatch"></div>
+    <h3 id="shadeName">Warm Sand</h3>
+    <p id="shadeDesc">Medium coverage · warm undertone</p>
+  </div>
+</section>
+
+<section class="products" id="products">
+  <div class="grid" id="grid"></div>
+</section>
+
+<footer class="footer-mini">
+  <span>LUXE © 2026 — Front-end demo by ZEROX</span>
+  <span>Built with HTML / CSS / JS</span>
+</footer>
+
+<script>
+  const shades = [
+    {name:'Porcelain', hex:'#f3d9c9', desc:'Light coverage · cool undertone'},
+    {name:'Warm Sand', hex:'#e0b394', desc:'Medium coverage · warm undertone'},
+    {name:'Honey', hex:'#cc8f66', desc:'Medium coverage · golden undertone'},
+    {name:'Amber', hex:'#a86a45', desc:'Full coverage · warm undertone'},
+    {name:'Cocoa', hex:'#7a4a30', desc:'Full coverage · neutral undertone'},
+    {name:'Espresso', hex:'#4f2e1e', desc:'Full coverage · deep undertone'},
+  ];
+  const shadeRow = document.getElementById('shadeRow');
+  const swatch = document.getElementById('swatch');
+  const shadeName = document.getElementById('shadeName');
+  const shadeDesc = document.getElementById('shadeDesc');
+
+  shades.forEach((s,i) => {
+    const dot = document.createElement('div');
+    dot.className = 'shade-dot' + (i===1 ? ' active' : '');
+    dot.style.background = s.hex;
+    dot.addEventListener('click', () => {
+      document.querySelectorAll('.shade-dot').forEach(d=>d.classList.remove('active'));
+      dot.classList.add('active');
+      swatch.style.background = s.hex;
+      shadeName.textContent = s.name;
+      shadeDesc.textContent = s.desc;
+    });
+    shadeRow.appendChild(dot);
+  });
+  swatch.style.background = shades[1].hex;
+
+  const products = [
+    {name:'Silk Foundation', price:32, emoji:'🧴'},
+    {name:'Velvet Lip Tint', price:18, emoji:'💋'},
+    {name:'Glow Highlighter', price:24, emoji:'✨'},
+    {name:'Brow Definer', price:16, emoji:'✏️'},
+    {name:'Blush Duo', price:22, emoji:'🌸'},
+    {name:'Setting Mist', price:20, emoji:'💦'},
+  ];
+  document.getElementById('grid').innerHTML = products.map(p => `
+    <div class="card">
+      <div class="card-img">${p.emoji}</div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-price">$${p.price.toFixed(2)}</div>
+        <button>Add to Bag</button>
+      </div>
+    </div>
+  `).join('');
+</script>
+</body>
+</html>
